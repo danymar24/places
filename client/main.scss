@@ -1,0 +1,9 @@
+/* CSS declarations go here */
+@import "{}/node_modules/materialize-css/sass/materialize.scss";
+
+$primary-color: color("materialize-indigo", "darken-4") !default;
+$secondary-color: color("materialize-light-blue", "darken-1") !default;
+
+nav {
+    @extend .indigo, .darken-4;
+}
