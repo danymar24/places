@@ -1,8 +1,17 @@
 /* CSS declarations go here */
 @import "{}/node_modules/materialize-css/sass/materialize.scss";
+@import "../imports/app/components/territory/Territory-styles.scss";
 
 $primary-color: color("materialize-indigo", "darken-4") !default;
 $secondary-color: color("materialize-light-blue", "darken-1") !default;
+
+#app {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+}
 
 nav {
     @extend .indigo, .darken-4;
