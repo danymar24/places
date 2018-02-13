@@ -15,4 +15,10 @@ $secondary-color: color("materialize-light-blue", "darken-1") !default;
 
 nav {
     @extend .indigo, .darken-4;
+    position: relative;
+    z-index: 100;
+}
+
+.sidenav-overlay {
+    z-index: 0;
 }

@@ -26,12 +26,10 @@ export class TerritoryList extends React.Component {
             return <li className='collection-item'>{territory.name}</li>
         })
         return (
-            <div>
-                <ul className='collection with-header'>
-                    <li className='collection-header'><h4>Territories</h4></li>
-                    {territories}
-                </ul>
-            </div>
+            <ul className='collection with-header'>
+                <li className='collection-header'><h4>Territories</h4></li>
+                {territories}
+            </ul>
         );
     }
 }
