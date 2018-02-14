@@ -8,3 +8,9 @@ if (Meteor.isServer) {
         return Territories.find();
     });
 }
+
+Meteor.methods({
+    'territories.insert'(data) {
+        return Territories.insert(data);
+    }
+})

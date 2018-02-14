@@ -1,7 +1,10 @@
 import React from 'react';
+import { Meteor } from 'meteor/meteor';
+
 import { GoogleMap, withScriptjs, withGoogleMap, Polygon, Rectangle } from 'react-google-maps';
 import DrawingManager from 'react-google-maps/lib/components/drawing/DrawingManager';
 import { MapMarker } from './Marker';
+import { TerritoryStore } from '../TerritoryStore';
 
 export class Map extends React.Component {
     constructor(props) {
@@ -10,7 +13,10 @@ export class Map extends React.Component {
             center: {}, 
             markers: [],
             selectedArea: {},
-            drawingMode: window.google.maps.drawing.OverlayType.POLYGON
+            drawingMode: window.google.maps.drawing.OverlayType.POLYGON,
+            selectedArea: [],
+            overlayType: '',
+            mode: ''
         }
     }
 
@@ -25,7 +31,7 @@ export class Map extends React.Component {
             this.setState({
                 center: currentLocation.position,
                 markers: [currentLocation],
-                drawingMode: window.google.maps.drawing.OverlayType.RECTANGLE
+                drawingMode: window.google.maps.drawing.OverlayType.POLYGON
             });
         });
     }
@@ -39,48 +45,108 @@ export class Map extends React.Component {
         e.overlay.setMap(null);
     }
 
-    figureClicked = (e) => {
-        console.log(e);
+    setAddMode = () => {
+        this.setState({
+            mode: 'add'
+        })
+    }
+
+    saveTerritory = () => {
+        console.log(this.state.selectedArea);
+        Meteor.call('territories.insert', {
+            area: this.state.selectedArea,
+            type: this.state.overlayType
+        }, (err, success) => {
+            if (err) {
+                M.toast({html: err.reason}, 4000);
+            } else {
+                M.toast({html: 'Territory created.'})
+            }
+        });
     }
     
+    cancelAdd = () => {
+        this.setState({
+            selectedArea: [],
+            mode: 'view'
+        })
+    }
+    
+    modifiedOverlay = (e) => {
+        const area = this.state.selectedArea.map(coord => {
+            return {lat: coord.lat(), lng: coord.lng()};
+        });
+        this.setState({
+            selectedArea: area
+        });
+    }
+
+    bindRef = ref => this.ref = ref;
+
     render() {
         const markers = this.state.markers.map((marker, i) => {
             return <MapMarker marker={ marker.position } key={i}/>                        
         })
+        
         return (
-            <GoogleMap
-                defaultZoom={15}
-                center={this.state.center} >
-                <DrawingManager drawingMode={this.state.drawingMode}
-                                defaultOptions={{
-                                    drawingControl: true,
-                                    drawingControlOptions: {
-                                        position: window.google.maps.ControlPosition.TOP_CENTER,
-                                        drawingModes: [
-                                            window.google.maps.drawing.OverlayType.POLYGON,
-                                            window.google.maps.drawing.OverlayType.RECTANGLE,
-                                        ],
-                                    }
-                                }}
-                                onOverlayComplete={this.onOverlayCompleted} />
-                    { this.state.overlayType === 'polygon' && <Polygon path={this.state.selectedArea}
-                            editable={true}
-                            onClick={this.figureClicked} 
-                            options={{
-                                strokeWeight: 2,
-                                fillColor:`#53b557`,
-                                fillOpacity: 0.35
-                            }}/> }
-                    { this.state.overlayType === 'rectangle' && <Rectangle bounds={this.state.selectedArea}
-                            editable={true}
-                            onClick={this.figureClicked} 
-                            options={{
-                                strokeWeight: 2,
-                                fillColor:`#53b557`,
-                                fillOpacity: 0.35
-                            }}/> }
-                { markers }
-            </GoogleMap>
+                <GoogleMap
+                    defaultZoom={15}
+                    center={this.state.center} >
+                    { this.state.mode === 'add' && 
+                        <DrawingManager drawingMode={this.state.drawingMode}
+                                        defaultOptions={{
+                                            drawingControl: true,
+                                            drawingControlOptions: {
+                                                position: window.google.maps.ControlPosition.TOP_CENTER,
+                                                drawingModes: [
+                                                    window.google.maps.drawing.OverlayType.POLYGON,
+                                                    window.google.maps.drawing.OverlayType.RECTANGLE,
+                                                ],
+                                            }
+                                        }}
+                                        onOverlayComplete={this.onOverlayCompleted} />}
+                        { this.state.overlayType === 'polygon' && <Polygon path={this.state.selectedArea}
+                                editable={this.state.mode === 'edit' || this.state.mode === 'add'}
+                                ref={this.bindRef}
+                                onMouseUp={this.modifiedOverlay.bind(this)}
+                                options={{
+                                    strokeWeight: 2,
+                                    fillColor:`#53b557`,
+                                    fillOpacity: 0.35,
+                                }}/> }
+                        { this.state.overlayType === 'rectangle' && <Rectangle bounds={this.state.selectedArea}
+                                editable={this.state.mode === 'edit' || this.state.mode === 'add'}
+                                onMouseUp={this.modifiedOverlay.bind(this)}
+                                options={{
+                                    strokeWeight: 2,
+                                    fillColor:`#53b557`,
+                                    fillOpacity: 0.35,
+                                }}/> }
+                    { markers }
+                    <div className='map-buttons' 
+                         style={{
+                                position: `absolute`,
+                                top: `54px`,
+                                left: `20px`
+                         }} >
+                        { this.state.mode !== 'add' && <button className='btn-floating btn-large waves-effect waves-light'
+                                onClick={this.setAddMode} >
+                            <i className='material-icons'>add</i>
+                        </button>}
+                        { this.state.mode === 'add' && ( <>
+                            <button className='btn-floating btn-large waves-effect waves-light'
+                                    onClick={this.saveTerritory} >
+                                <i className='material-icons'>save</i>
+                            </button> 
+                            <button className='btn-floating btn-small waves-effect waves-light red'
+                                    onClick={this.cancelAdd}
+                                    style={{ marginLeft: `10px` }} >
+                                <i className='material-icons'>delete</i>
+                            </button>
+                        </>)}
+                    </div>
+                }
+                </GoogleMap>
         )
     }
 }
