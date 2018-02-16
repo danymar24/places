@@ -12,5 +12,8 @@ if (Meteor.isServer) {
 Meteor.methods({
     'territories.insert'(data) {
         return Territories.insert(data);
+    },
+    'territories.remove'(ids) {
+        return Territories.remove( {_id: { $in: ids }});
     }
 })

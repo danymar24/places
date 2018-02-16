@@ -4,6 +4,7 @@ import { Meteor } from 'meteor/meteor';
 import { GoogleMap, withScriptjs, withGoogleMap, Polygon, Rectangle } from 'react-google-maps';
 import DrawingManager from 'react-google-maps/lib/components/drawing/DrawingManager';
 import { MapMarker } from './Marker';
+import { Territory } from './Territory';
 import { TerritoryStore } from '../TerritoryStore';
 
 export class Map extends React.Component {
@@ -52,9 +53,16 @@ export class Map extends React.Component {
     }
 
     saveTerritory = () => {
-        console.log(this.state.selectedArea);
+        let area;
+        if (this.state.overlayType === 'polygon') {
+            area = this.ref.getPath().b.map(coord => {
+                return {lat: coord.lat(), lng: coord.lng()};
+            });
+        } else {
+            area = this.state.selectedArea;
+        }
         Meteor.call('territories.insert', {
-            area: this.state.selectedArea,
+            area,
             type: this.state.overlayType
         }, (err, success) => {
             if (err) {
@@ -63,21 +71,23 @@ export class Map extends React.Component {
                 M.toast({html: 'Territory created.'})
             }
         });
+        this.setState({
+            selectedArea: [],
+            overlayType: []
+        })
     }
     
     cancelAdd = () => {
         this.setState({
             selectedArea: [],
+            overlayType: '',
             mode: 'view'
         })
     }
     
     modifiedOverlay = (e) => {
-        const area = this.state.selectedArea.map(coord => {
-            return {lat: coord.lat(), lng: coord.lng()};
-        });
         this.setState({
-            selectedArea: area
+            selectedArea: this.ref.getPath().b
         });
     }
 
@@ -105,23 +115,10 @@ export class Map extends React.Component {
                                             }
                                         }}
                                         onOverlayComplete={this.onOverlayCompleted} />}
-                        { this.state.overlayType === 'polygon' && <Polygon path={this.state.selectedArea}
-                                editable={this.state.mode === 'edit' || this.state.mode === 'add'}
-                                ref={this.bindRef}
-                                onMouseUp={this.modifiedOverlay.bind(this)}
-                                options={{
-                                    strokeWeight: 2,
-                                    fillColor:`#53b557`,
-                                    fillOpacity: 0.35,
-                                }}/> }
-                        { this.state.overlayType === 'rectangle' && <Rectangle bounds={this.state.selectedArea}
-                                editable={this.state.mode === 'edit' || this.state.mode === 'add'}
-                                onMouseUp={this.modifiedOverlay.bind(this)}
-                                options={{
-                                    strokeWeight: 2,
-                                    fillColor:`#53b557`,
-                                    fillOpacity: 0.35,
-                                }}/> }
+                        <Territory territory={{area: this.state.selectedArea, type: this.state.overlayType}}
+                                   mode={this.state.mode}
+                                   modifiedOverlay={this.modifiedOverlay}
+                                   bindRef={this.bindRef} />
                     { markers }
                     <div className='map-buttons' 
                          style={{
@@ -145,7 +142,6 @@ export class Map extends React.Component {
                             </button>
                         </>)}
                     </div>
-                }
                 </GoogleMap>
         )
     }
