@@ -1,6 +1,7 @@
 /* CSS declarations go here */
 @import "{}/node_modules/materialize-css/sass/materialize.scss";
 @import "../imports/app/components/territory/Territory-styles.scss";
+@import "../imports/app/components/users/Users-styles.scss";
 
 $primary-color: color("materialize-indigo", "darken-4") !default;
 $secondary-color: color("materialize-light-blue", "darken-1") !default;

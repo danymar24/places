@@ -1,0 +1,13 @@
+#login {
+    height: calc(100% - 64px);
+    
+    .card {
+        min-width: 320px;
+        margin: 0 auto;
+
+    }
+}
+input {
+    position: relative;
+    z-index: 1;
+}

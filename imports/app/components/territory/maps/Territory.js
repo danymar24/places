@@ -40,7 +40,7 @@ export class Territory extends React.Component {
                                  fillOpacity: 0.35,
                              }}/> }
                 { territory && territory.type === 'rectangle' && 
-                    <Rectangle bounds={this.state.territory}
+                    <Rectangle bounds={territory.area}
                                editable={mode === 'edit' || mode === 'add'}
                                onMouseUp={modifiedOverlay.bind(this)}
                                options={{

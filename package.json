@@ -8,6 +8,7 @@
     "@babel/runtime": "^7.0.0-beta.36",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "bcrypt": "^1.0.3",
     "materialize-css": "^1.0.0-alpha.3",
     "meteor-node-stubs": "^0.3.2",
     "mobx": "^3.5.1",

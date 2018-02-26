@@ -60,7 +60,7 @@ export class Map extends React.Component {
             area,
             type: e.type
         });
-        console.log(TerritoryStore.territory.area);
+        console.log('area from map', TerritoryStore.territory.area);
     }
 
     setEditMode = () => {
@@ -135,7 +135,7 @@ export class Map extends React.Component {
                                                 position: window.google.maps.ControlPosition.TOP_CENTER,
                                                 drawingModes: [
                                                     window.google.maps.drawing.OverlayType.POLYGON,
-                                                    window.google.maps.drawing.OverlayType.RECTANGLE,
+                                                    // window.google.maps.drawing.OverlayType.RECTANGLE,
                                                 ],
                                             }
                                         }}
