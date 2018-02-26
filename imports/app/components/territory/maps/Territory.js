@@ -1,9 +1,28 @@
 import React from 'react';
 import { Polygon, Rectangle } from 'react-google-maps';
+import { TerritoryStore } from '../TerritoryStore';
 
 export class Territory extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            territory: {}
+        }
+    }
+
+    componentWillReceiveProps(props) {
+        console.log('props', props);
+        if (props.territory && props.territory.type && props.territory.type !== 'polygon') {
+            const area = props.territory.area;
+            this.setState({
+                territory: area
+            });
+            console.log('state', this.state);
+        }
+    }
+
+    componentWillUpdate() {
+        return true;
     }
     
     render() {
@@ -21,7 +40,7 @@ export class Territory extends React.Component {
                                  fillOpacity: 0.35,
                              }}/> }
                 { territory && territory.type === 'rectangle' && 
-                    <Rectangle bounds={territory.area}
+                    <Rectangle bounds={this.state.territory}
                                editable={mode === 'edit' || mode === 'add'}
                                onMouseUp={modifiedOverlay.bind(this)}
                                options={{

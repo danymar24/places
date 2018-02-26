@@ -1,4 +1,5 @@
 import React from 'react';
+import { observer } from 'mobx-react';
 import { Meteor } from 'meteor/meteor';
 
 import { GoogleMap, withScriptjs, withGoogleMap, Polygon, Rectangle } from 'react-google-maps';
@@ -7,17 +8,18 @@ import { MapMarker } from './Marker';
 import { Territory } from './Territory';
 import { TerritoryStore } from '../TerritoryStore';
 
+// Todo: Add center to created territory
+// Todo: add delete territory
+// Todo: add square figure
+
+@observer
 export class Map extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             center: {}, 
             markers: [],
-            selectedArea: {},
             drawingMode: window.google.maps.drawing.OverlayType.POLYGON,
-            selectedArea: [],
-            overlayType: '',
-            mode: ''
         }
     }
 
@@ -37,33 +39,46 @@ export class Map extends React.Component {
         });
     }
 
-    onOverlayCompleted = (e) => {
-        this.setState({
-            drawingMode: null,
-            selectedArea: e.type === 'polygon' ? e.overlay.getPath().b : e.overlay.getBounds(),
-            overlayType: e.type
-        });
-        e.overlay.setMap(null);
+    componentWillUpdate() {
+        return true;
     }
 
-    setAddMode = () => {
-        this.setState({
-            mode: 'add'
-        })
+    onOverlayCompleted = (e) => {
+        e.overlay.setMap(null);
+        let area;
+        if (e.type === 'polygon') {
+            area = e.overlay.getPath().b;
+        } else {
+            area = {
+                north: e.overlay.getBounds().getNorthEast().lat(),
+                south: e.overlay.getBounds().getNorthEast().lng(),
+                east: e.overlay.getBounds().getSouthWest().lat(),
+                west: e.overlay.getBounds().getSouthWest().lng()    
+            }
+        }
+        TerritoryStore.setSelectedTerritory({
+            area,
+            type: e.type
+        });
+        console.log(TerritoryStore.territory.area);
+    }
+
+    setEditMode = () => {
+        TerritoryStore.mode = 'edit';
     }
 
     saveTerritory = () => {
         let area;
-        if (this.state.overlayType === 'polygon') {
+        if (TerritoryStore.territory.type === 'polygon') {
             area = this.ref.getPath().b.map(coord => {
                 return {lat: coord.lat(), lng: coord.lng()};
             });
         } else {
-            area = this.state.selectedArea;
+            area = TerritoryStore.territory.area;
         }
-        Meteor.call('territories.insert', {
+        Meteor.call('territories.save', TerritoryStore.territory._id, {
             area,
-            type: this.state.overlayType
+            type: TerritoryStore.territory.type
         }, (err, success) => {
             if (err) {
                 M.toast({html: err.reason}, 4000);
@@ -71,24 +86,34 @@ export class Map extends React.Component {
                 M.toast({html: 'Territory created.'})
             }
         });
-        this.setState({
-            selectedArea: [],
-            overlayType: []
-        })
+        if (!TerritoryStore.territory._id) {
+            TerritoryStore.setSelectedTerritory({});
+        }
     }
     
     cancelAdd = () => {
-        this.setState({
-            selectedArea: [],
-            overlayType: '',
-            mode: 'view'
-        })
+        TerritoryStore.setSelectedTerritory({});
+        TerritoryStore.mode = 'view';
     }
     
     modifiedOverlay = (e) => {
-        this.setState({
-            selectedArea: this.ref.getPath().b
+        TerritoryStore.setSelectedTerritory({
+            _id: TerritoryStore.territory._id,
+            area: this.ref.getPath().b,
+            type: TerritoryStore.territory.type
         });
+    }
+
+    removeTerritory = (territory) => {
+        Meteor.call('territories.remove', territory._id, (err, success) => {
+            if (err) {
+                M.toast({ html: err.reason }, 4000);
+            } else {
+                TerritoryStore.setSelectedTerritory({});
+                TerritoryStore.mode = 'view';
+                M.toast({ html: 'Territory deleted' }, 4000);
+            }
+        })
     }
 
     bindRef = ref => this.ref = ref;
@@ -102,7 +127,7 @@ export class Map extends React.Component {
                 <GoogleMap
                     defaultZoom={15}
                     center={this.state.center} >
-                    { this.state.mode === 'add' && 
+                    { TerritoryStore.mode === 'add' && 
                         <DrawingManager drawingMode={this.state.drawingMode}
                                         defaultOptions={{
                                             drawingControl: true,
@@ -115,8 +140,11 @@ export class Map extends React.Component {
                                             }
                                         }}
                                         onOverlayComplete={this.onOverlayCompleted} />}
-                        <Territory territory={{area: this.state.selectedArea, type: this.state.overlayType}}
-                                   mode={this.state.mode}
+                        <Territory territory={{
+                                        area: TerritoryStore.territory.area, 
+                                        type: TerritoryStore.territory && TerritoryStore.territory.type
+                                    }}
+                                   mode={TerritoryStore.mode}
                                    modifiedOverlay={this.modifiedOverlay}
                                    bindRef={this.bindRef} />
                     { markers }
@@ -126,20 +154,28 @@ export class Map extends React.Component {
                                 top: `54px`,
                                 left: `20px`
                          }} >
-                        { this.state.mode !== 'add' && <button className='btn-floating btn-large waves-effect waves-light'
-                                onClick={this.setAddMode} >
-                            <i className='material-icons'>add</i>
-                        </button>}
-                        { this.state.mode === 'add' && ( <>
+                        { TerritoryStore.mode !== 'edit' && TerritoryStore.territory && TerritoryStore.territory._id &&
+                            <button className='btn-floating btn-large waves-effect waves-light'
+                                onClick={this.setEditMode} >
+                                <i className='material-icons'>edit</i>
+                            </button>}
+                        { (TerritoryStore.mode === 'add' || TerritoryStore.mode === 'edit') && 
+                        ( <>
                             <button className='btn-floating btn-large waves-effect waves-light'
                                     onClick={this.saveTerritory} >
                                 <i className='material-icons'>save</i>
                             </button> 
-                            <button className='btn-floating btn-small waves-effect waves-light red'
+                            <button className='btn-floating btn-small waves-effect waves-light amber darken-2'
                                     onClick={this.cancelAdd}
                                     style={{ marginLeft: `10px` }} >
-                                <i className='material-icons'>delete</i>
+                                <i className='material-icons'>cancel</i>
                             </button>
+                            { TerritoryStore.territory._id && 
+                                <button className='btn-floating btn-small waves-effect waves-light red'
+                                        onClick={this.removeTerritory.bind(this, TerritoryStore.territory)}
+                                        style={{ marginLeft: `10px` }} >
+                                    <i className='material-icons'>delete</i>
+                                </button>}
                         </>)}
                     </div>
                 </GoogleMap>

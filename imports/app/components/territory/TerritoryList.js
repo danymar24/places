@@ -1,9 +1,11 @@
 import React from 'react';
+import { observer } from 'mobx-react';
 import { Tracker } from 'meteor/tracker';
 
 import { Territories } from '../../../api/territories';
 import { TerritoryStore } from './TerritoryStore';
 
+@observer
 export class TerritoryList extends React.Component {
     constructor(props) {
         super(props);
@@ -24,50 +26,22 @@ export class TerritoryList extends React.Component {
     }
 
     selectTerritory = (territory) => {
-        territory.selected = !territory.selected;
-        return territory;
+        TerritoryStore.territory = territory;
+        TerritoryStore.mode = 'view';
     }
 
-    selectAllTerritories = () => {
-        this.setState({
-            selectAllTerritories: !!this.state.selectAllTerritories
-        });
-        const territories = this.state.territories.map(territory => {
-            territory.selected = this.state.selectAllTerritories; 
-            return territory
-        });
-        this.setState({
-            territories
-        });
-    }
-
-    deleteSelected = () => {
-        const territories = this.state.territories.filter(territory => {
-            return territory.selected;
-        });
-        const ids = territories.map(territory => {
-            return territory._id;
-        });
-        Meteor.call('territories.remove', ids, (err, success) => {
-            if (err) {
-                M.toast({ html: err.reason });
-            } else {
-                M.toast({ html: 'Territories deleted.'})
-            }
-        });
+    setAddMode = () => {
+        TerritoryStore.setSelectedTerritory({});
+        TerritoryStore.mode = 'add';
     }
 
     render() {
         const territories = this.state.territories.map((territory, i) => {
             return (
-                <a className='collection-item' key={i}>
-                    <label>
-                        <input type="checkbox" 
-                               className="filled-in" 
-                               checked={territory.selected} 
-                               onChange={() => { territory.selected = !territory.selected }} />
-                        <span></span>
-                    </label>
+                <a href='#'
+                   onClick={this.selectTerritory.bind(this, territory)}
+                   className={`collection-item ${TerritoryStore.territory && TerritoryStore.territory._id === territory._id ? 'active' : ''}`} 
+                   key={i}>
                     Territory #{i + 1}            
                 </a>
             )
@@ -75,20 +49,12 @@ export class TerritoryList extends React.Component {
         return (
             <ul className='collection with-header'>
                 <li className='collection-header'>
-                    <h4>Territories</h4>
-                    <label>
-                        <input type="checkbox" 
-                               className="filled-in" 
-                               onChange={this.selectAllTerritories} />
-                        <span>Select all</span>
-                    </label>
-                    <label className='right'>
-                        <span>Delete selected</span>
-                        <button className='delete-all btn btn-small waves-effect waves-light red'
-                                onClick={this.deleteSelected}>
-                            <i className='material-icons'>delete</i>
+                    <h4>Territories
+                        <button className='btn-floating btn-small waves-effect waves-light right'
+                            onClick={this.setAddMode} >
+                            <i className='material-icons'>add</i>
                         </button>
-                    </label>
+                    </h4>
                 </li>
                 {territories}
             </ul>

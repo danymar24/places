@@ -10,10 +10,14 @@ if (Meteor.isServer) {
 }
 
 Meteor.methods({
-    'territories.insert'(data) {
-        return Territories.insert(data);
+    'territories.save'(id, data) {
+        if (id) {
+            return Territories.update({ _id: id }, { $set: { area: data.area }});
+        } else {
+            return Territories.insert(data);
+        }
     },
-    'territories.remove'(ids) {
-        return Territories.remove( {_id: { $in: ids }});
+    'territories.remove'(id) {
+        return Territories.remove( {_id: id});
     }
 })
