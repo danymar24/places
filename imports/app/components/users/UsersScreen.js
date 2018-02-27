@@ -41,7 +41,7 @@ export class UsersScreen extends React.Component {
             },
             {
                 header: 'Email',
-                bind: 'emails[0].address'
+                bind: 'emails.0.address'
             }
         ]
 
@@ -53,10 +53,10 @@ export class UsersScreen extends React.Component {
                         <i className='material-icons'>add</i>
                     </button>
                 </h4>
-                <DataGrid className='striped highlight'
+                <DataGrid className={`striped highlight`}
                           columns={columns} 
                           data={this.state.users} />
-                <AddUser />
+                <AddUser modal={this.addUserModal} />
             </div>
         );
     }

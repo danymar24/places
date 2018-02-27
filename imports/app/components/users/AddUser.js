@@ -21,6 +21,7 @@ export class AddUser extends React.Component {
                 M.toast({html: err.reason}, 4000);
             } else {
                 M.toast({html: 'User created.'}, 4000);
+                this.props.modal.close();
             }
         });
     }

@@ -25,6 +25,7 @@ export class NavBar extends React.Component {
 
                 <ul id='slide-out' className='sidenav'>
                     <li><Link to='/home'>Home</Link></li>
+                    <li><Link to='/users'>Users</Link></li>
                     <li><Link to='/territories'>Territories</Link></li>
                 </ul>
             </nav>

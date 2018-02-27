@@ -22,6 +22,10 @@ export class DataGrid extends React.Component {
             });
         }
     }
+
+    getBindingValue = (obj, path) => (
+        path.split('.').reduce((acc, part) => acc && acc[part], obj)
+    );
     
     render() {
         const { columns, className } = this.props;
@@ -32,8 +36,8 @@ export class DataGrid extends React.Component {
 
         const rows = data.map((row, i) => {
             const dataColumns = columns.map((column, i) => {
-                console.log(row.profile.firstName);
-                return <td key={i}>{row[column.bind]}</td>
+                console.log(this.getBindingValue(row, column.bind));
+                return <td key={i}>{this.getBindingValue(row, column.bind)}</td>
             })
             return (
                 <tr key={i}>
