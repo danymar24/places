@@ -17,7 +17,7 @@ export class LoginScreen extends React.Component {
             if (err) {
                 M.toast({html: err.reason}, 4000);
             } else {
-                console.log('logged in');
+                this.props.history.replace('/territories');
             }
         });
     }

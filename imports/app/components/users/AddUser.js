@@ -1,5 +1,7 @@
 import React from 'react';
 
+// Todo: Add email invite
+
 export class AddUser extends React.Component {
     constructor(props) {
         super(props);
@@ -22,6 +24,16 @@ export class AddUser extends React.Component {
             } else {
                 M.toast({html: 'User created.'}, 4000);
                 this.props.modal.close();
+            }
+        });
+    }
+
+    sendInvitation() {
+        Meteor.call('users.sendInvitation', (err, success) => {
+            if (err) {
+                M.toast({html: err.reason}, 4000);
+            } else {
+                M.toast({html: 'Invitation sent.'}, 4000);
             }
         });
     }
@@ -63,6 +75,10 @@ export class AddUser extends React.Component {
                     <button className='btn waves-effect waves-light'
                             onClick={this.insertUser} >
                         Add user
+                    </button>
+                    <button className='btn waves-effect waves-light'
+                            onClick={this.sendInvitation} >
+                        send email
                     </button>
                     <a href='#' 
                        className='modal-action modal-close waves-effect waves-light btn-flat'>

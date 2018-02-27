@@ -4,6 +4,7 @@ import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { HomeScreen } from './components/home/HomeScreen';
 import { NavBar } from './components/navBar/NavBar';
 import { LoginScreen } from './components/users/LoginScreen';
+import { SetPasswordScreen } from './components/users/SetPassword';
 import { TerritoriesScreen } from './components/territory/TerritoriesScreen';
 import { UsersScreen } from './components/users/UsersScreen';
 
@@ -15,6 +16,7 @@ export class App extends React.Component {
                 <Switch>
                     <Route path='/home' component={HomeScreen} />
                     <Route path='/login' component={LoginScreen} />
+                    <Route path='/set-password/:id' component={SetPasswordScreen} />
                     <Route path='/territories' component={TerritoriesScreen} />
                     <Route path='/users' component={UsersScreen} />
                 </Switch>
