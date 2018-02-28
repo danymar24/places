@@ -10,14 +10,18 @@ if (Meteor.isServer) {
 
     Accounts.onCreateUser((options, user) => {
         const modifiedUser = Object.assign({
-            role: 'user'
+            profile: options.profile
         }, user);
-        sendInvitation(user);
+        sendInvitation(modifiedUser);
         return modifiedUser;
     })
 }
 
 Meteor.methods({
+    'users.getPermissions'() {
+        const user = Meteor.users.findOne({ _id: Meteor.userId()}, { fields: {emails: 1, profile: 1}});
+        return user;
+    },
     'users.insert'(email, profile) {
         return Accounts.createUser({
             email,
@@ -30,6 +34,9 @@ Meteor.methods({
     },
     'users.sendInvitation'(user) {
         sendInvitation(user);
+    },
+    'users.remove'(id) {
+        return Meteor.users.remove({ _id: id });
     }
 })
 

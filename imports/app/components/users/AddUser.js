@@ -8,15 +8,23 @@ export class AddUser extends React.Component {
         this.state = {
             firstName: '',
             lastName: '',
-            email: ''
+            email: '',
+            role: 'user'
         }
     }
+
+    componentDidMount() {
+        const elem = document.querySelector('select');
+        const instance = M.Select.init(elem, {});
+    }
+    
     
     insertUser = () => {
-        const { email, firstName, lastName } = this.state;
+        const { email, firstName, lastName, role } = this.state;
         const profile = {
             firstName,
-            lastName
+            lastName,
+            role
         }
         Meteor.call('users.insert', email, profile, (err, success) => {
             if (err) {
@@ -40,7 +48,7 @@ export class AddUser extends React.Component {
 
     render() {
         return (
-            <div id='addUserModal' className='modal'>
+            <div id='addUserModal' className='modal modal-fixed-footer'>
                 <div className='modal-content'>
                     <h4>Add user</h4>
                     <form onSubmit={this.insertUser}>
@@ -61,12 +69,21 @@ export class AddUser extends React.Component {
                             </div>
                         </div>
                         <div className="row">
-                            <div className="input-field col s12">
+                            <div className="input-field col s8">
                                 <input id="email" 
                                        type="email" 
                                        className="validate"
                                        onChange={ e => this.setState({ email: e.target.value})} />
                                 <label>Email</label>
+                            </div>
+                            <div className='input-field col s4'>
+                                <select onChange={ e => this.setState({ role: e.target.value})}
+                                        value={this.state.role} >
+                                    <option value='user'>User</option>
+                                    <option value='editor'>Editor</option>
+                                    <option value='admin'>Admin</option>
+                                </select>
+                                <label>Role</label>
                             </div>
                         </div>
                     </form>

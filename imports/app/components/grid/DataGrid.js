@@ -2,6 +2,21 @@ import React from 'react';
 
 // Todo: fix grid column binding
 
+/**
+ * Data grid
+ * 
+ * Props:
+ * @columns {array<object>} - Array of columns
+ * @delete  {function} - Function used for the delete button
+ * 
+ * @deleteColumn {object}:
+ * header: {string}     - 'Delete'
+ * bind: {string}       - value returned to the delete function
+ * buttonText: {string} - Text used in the delete button
+ * className: {string}  - classnames for the delete button
+ * icon: {html}         - Html for the button icon Ex. <i className='icon'></i>
+ */
+
 export class DataGrid extends React.Component {
     constructor(props) {
         super(props);
@@ -15,8 +30,7 @@ export class DataGrid extends React.Component {
     }
 
     componentWillReceiveProps(props) {
-        if (props.data.length > 0) {
-            console.log(props);
+        if (props.data.length >= 0) {
             this.setState({
                 data: props.data
             });
@@ -36,7 +50,17 @@ export class DataGrid extends React.Component {
 
         const rows = data.map((row, i) => {
             const dataColumns = columns.map((column, i) => {
-                console.log(this.getBindingValue(row, column.bind));
+                if (column.header.toLowerCase() === 'delete' ) {
+                    return (
+                        <td key={i}>
+                            <button className={column.className}
+                                    onClick={this.props.delete.bind(this, this.getBindingValue(row, column.bind))}>
+                                { column.icon }
+                                { column.buttonText }
+                            </button>
+                        </td>
+                    )
+                }
                 return <td key={i}>{this.getBindingValue(row, column.bind)}</td>
             })
             return (

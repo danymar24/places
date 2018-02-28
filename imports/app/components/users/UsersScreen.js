@@ -2,8 +2,7 @@ import React from 'react';
 import { DataGrid } from '../grid/DataGrid';
 import { AddUser } from './AddUser';
 
-// Todo: Add delete user
-// Add roles
+
 
 export class UsersScreen extends React.Component {
     constructor(props) {
@@ -28,6 +27,20 @@ export class UsersScreen extends React.Component {
     openAddModal = (e) => {
         this.addUserModal.open();
     }
+
+    deleteUser = (id) => {
+        Meteor.call('users.remove', id, (err, success) => {
+            if (err) {
+                M.toast({ html: err.reason }, 4000);
+            } else {
+                M.toast({ html: 'User deleted'}, 4000);
+            }
+        });
+    }
+
+    editUser = (id) => {
+        console.log(object);
+    }
     
     render() {
         const columns = [
@@ -42,6 +55,21 @@ export class UsersScreen extends React.Component {
             {
                 header: 'Email',
                 bind: 'emails.0.address'
+            },
+            {
+                header: 'Role',
+                bind: 'profile.role'
+            },
+            {
+                header: 'Edit',
+                bind: '_id',
+            },
+            {
+                header: 'Delete',
+                bind: '_id',
+                buttonText: '',
+                className: `btn waves-effect waves-ligh red darken-3`,
+                icon: <i className='material-icons'>delete</i>
             }
         ]
 
@@ -55,7 +83,8 @@ export class UsersScreen extends React.Component {
                 </h4>
                 <DataGrid className={`striped highlight`}
                           columns={columns} 
-                          data={this.state.users} />
+                          data={this.state.users} 
+                          delete={this.deleteUser}/>
                 <AddUser modal={this.addUserModal} />
             </div>
         );
