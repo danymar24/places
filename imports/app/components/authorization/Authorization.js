@@ -10,8 +10,9 @@ export const Authorization = (allowedRoles) =>
                     user: SessionStore.getLoggedInUser()
                 }
             }
-            render() {
-                const { role } = this.state.user.profile;
+
+            componentWillMount() {
+                let role = SessionStore.userRole();
                 if (allowedRoles.includes(role)) {
                     return <WrappedComponent {...this.props} />
                 } else {

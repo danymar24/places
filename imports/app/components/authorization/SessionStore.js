@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { observable, action, computed } from 'mobx';
 
 class store {
     @observable loggedInUser = {};
@@ -11,7 +11,9 @@ class store {
     }
 
     @action userRole() {
-        return this.loggedInUser.profile.role;
+        if (this.loggedInUser && this.loggedInUser.profile) {            
+            return this.loggedInUser.profile.role;
+        }
     }
 }
 

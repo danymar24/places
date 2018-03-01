@@ -1,6 +1,7 @@
 import React from 'react';
-import Link from 'react-router-dom/Link';
+import { Link, withRouter } from 'react-router-dom';
 
+@withRouter
 export class NavBar extends React.Component {
     componentDidMount() {
         const elem = document.querySelector('.sidenav');
@@ -9,6 +10,12 @@ export class NavBar extends React.Component {
         $('.sidenav li').click(() => {
             instance.close();
         })
+    }
+
+    logout = () => {
+        Meteor.logout(() => {
+            this.props.history.replace('/login');
+        });
     }
     
     render() {
@@ -27,6 +34,7 @@ export class NavBar extends React.Component {
                     <li><Link to='/home'>Home</Link></li>
                     <li><Link to='/users'>Users</Link></li>
                     <li><Link to='/territories'>Territories</Link></li>
+                    <li><a href='#' onClick={this.logout}>Logout</a></li>
                 </ul>
             </nav>
         );

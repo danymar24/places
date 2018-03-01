@@ -1,7 +1,5 @@
 import React from 'react';
 
-// Todo: fix grid column binding
-
 /**
  * Data grid
  * 

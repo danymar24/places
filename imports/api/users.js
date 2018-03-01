@@ -46,6 +46,6 @@ function sendInvitation(user) {
         to: user.emails[0].address,
         from: 'Daniel Rdz <danymar24@gmail.com>',
         subject: 'You have been invited to places!',
-        html: `Please visit places app!!! <a href='${url}/set-password/${user._id}'>Here</a>`
+        html: `Please visit places app!!! <a href='${url}set-password/${user._id}'>Here</a>`
     });
 }
