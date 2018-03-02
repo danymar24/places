@@ -24,6 +24,10 @@ export class UsersScreen extends React.Component {
         this.addUserModal = M.Modal.init(elem, {});
     }
 
+    componentWillUnmount() {
+        this.usersTracker.stop();
+    }
+
     openAddModal = (e) => {
         this.addUserModal.open();
     }
@@ -46,15 +50,15 @@ export class UsersScreen extends React.Component {
         const columns = [
             {
                 header: 'Name',
-                bind: 'profile.firstName'
+                bind: 'address'
             },
             {
                 header: 'Lastname',
-                bind: 'profile.lastName'
+                bind: 'city'
             },
             {
                 header: 'Email',
-                bind: 'emails.0.address'
+                bind: 'state'
             },
             {
                 header: 'Role',

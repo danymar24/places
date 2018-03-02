@@ -11,6 +11,7 @@ import { TerritoryStore } from '../TerritoryStore';
 // Todo: Add center to created territory
 // Todo: add delete territory
 // Todo: add square figure
+// Todo: search for the fitBounds function
 
 @observer
 export class Map extends React.Component {
@@ -36,11 +37,16 @@ export class Map extends React.Component {
                 markers: [currentLocation],
                 drawingMode: window.google.maps.drawing.OverlayType.POLYGON
             });
+            TerritoryStore.setCenter(currentLocation.position);
         });
     }
 
     componentWillUpdate() {
         return true;
+    }
+
+    componentWillReceiveProps(nextProps) {
+        console.log(nextProps);
     }
 
     onOverlayCompleted = (e) => {
@@ -125,8 +131,9 @@ export class Map extends React.Component {
         
         return (
                 <GoogleMap
+                    ref='map'
                     defaultZoom={15}
-                    center={this.state.center} >
+                    center={TerritoryStore.center} >
                     { TerritoryStore.mode === 'add' && 
                         <DrawingManager drawingMode={this.state.drawingMode}
                                         defaultOptions={{

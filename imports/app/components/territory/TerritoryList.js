@@ -26,8 +26,34 @@ export class TerritoryList extends React.Component {
     }
 
     selectTerritory = (territory) => {
+        TerritoryStore.center = this.getCenter(territory.area);
         TerritoryStore.territory = territory;
         TerritoryStore.mode = 'view';
+    }
+    
+    getCenter = (area) => {
+            var lowx,
+                highx,
+                lowy,
+                highy,
+                lats = [],
+                lngs = [],
+                vertices = area;
+        
+            for(var i=0; i<vertices.length; i++) {
+              lngs.push(vertices[i].lng);
+              lats.push(vertices[i].lat);
+            }
+        
+            lats.sort();
+            lngs.sort();
+            lowx = lats[0];
+            highx = lats[vertices.length - 1];
+            lowy = lngs[0];
+            highy = lngs[vertices.length - 1];
+            center_x = lowx + ((highx-lowx) / 2);
+            center_y = lowy + ((highy - lowy) / 2);
+            return (new google.maps.LatLng(center_x, center_y));
     }
 
     setAddMode = () => {
