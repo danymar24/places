@@ -1,7 +1,9 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Tracker } from 'meteor/tracker';
 
 import { Places } from '../../../api/places';
+import { DataGrid } from '../grid/DataGrid';
 
 // todo: create places list
 // todo: create add place: https://github.com/kenny-hibino/react-places-autocomplete
@@ -21,6 +23,16 @@ export class PlacesListScreen extends React.Component {
             this.setState({
                 places
             });
+        });
+    }
+
+    removePlace = (id) => {
+        Meteor.call('places.remove', id, (err, success) => {
+            if (err) {
+                M.toast({html: err.reason}, 4000);
+            } else {
+                M.toast({html: 'Place removed.'}, 4000);
+            }
         });
     }
 
@@ -60,8 +72,16 @@ export class PlacesListScreen extends React.Component {
         ]
 
         return (
-            <div>
-                This is places list screen!!
+            <div className='container'>
+                <h4>Places
+                    <Link to='/add-place'
+                          className='btn-floating btn-small waves-effect waves-light' >
+                        <i className='material-icons'>add</i>
+                    </Link>
+                </h4>
+                <DataGrid columns={columns} 
+                          data={this.state.places} 
+                          delete={this.removePlace} />
             </div>
         );
     }

@@ -12,6 +12,7 @@ import { UsersScreen } from './components/users/UsersScreen';
 import { PlacesListScreen } from './components/places/PlacesListScreen';
 import { PlacesMapScreen } from './components/places/PlacesMapScreen';
 import { Authorization } from './components/authorization/Authorization';
+import { AddPlace } from './components/places/AddPlace';
 
 // Todo: Add authorization redirect on page change
 
@@ -35,6 +36,7 @@ export class App extends React.Component {
                     <Route path='/territories' component={TerritoriesScreen} />
                     <Route path='/places-list' component={PlacesListScreen} />
                     <Route path='/places-map' component={PlacesMapScreen} />
+                    <Route path='/add-place' component={AddPlace} />
                     <Route path='*' component={LoginScreen} />
                 </Switch>
             </>

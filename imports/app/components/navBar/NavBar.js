@@ -34,6 +34,7 @@ export class NavBar extends React.Component {
                     <li><Link to='/home'>Home</Link></li>
                     <li><Link to='/users'>Users</Link></li>
                     <li><Link to='/territories'>Territories</Link></li>
+                    <li><Link to='/places-list'>Places</Link></li>
                     <li><a href='#' onClick={this.logout}>Logout</a></li>
                 </ul>
             </nav>
