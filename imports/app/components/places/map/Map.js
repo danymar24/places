@@ -8,7 +8,10 @@ import { SearchBox } from 'react-google-maps/lib/components/places/SearchBox';
 
 import { MapMarker } from './Marker';
 
-// Todo: Fix markers
+// Todo: Convert add place page to places by map
+// Todo: Create add place mode
+// Todo: add places list to add page
+// Todo: add edit modal
 
 export class Map extends React.Component {
     constructor(props) {
@@ -20,6 +23,7 @@ export class Map extends React.Component {
     }
 
     componentWillMount() {
+        this.geocoder = new window.google.maps.Geocoder();
         navigator.geolocation.getCurrentPosition((position) => {
             const lat = Number(position.coords.latitude);
             const lng = Number(position.coords.longitude);
@@ -65,8 +69,20 @@ export class Map extends React.Component {
         };
     
         this.locationClicked = (e) => {
-            this.setState({
-                markers: [{ lat: e.latLng.lat(), lng: e.latLng.lng() }]
+            this.geocoder.geocode({
+                'latLng': e.latLng
+            }, (results, status) => {
+                const newMarker = {
+                    placeInfo: {
+                        name: `${results[0].address_components[0].short_name} ${results[0].address_components[1].short_name}`,
+                        formatted_address: results[0].formatted_address
+                    },
+                    position: results[0].geometry.location,
+                    open: true
+                };
+                this.setState({
+                    markers: [newMarker]
+                });
             });
         }
     
@@ -89,7 +105,8 @@ export class Map extends React.Component {
                 <GoogleMap
                     ref='map'
                     defaultZoom={15}
-                    center={this.state.center} >
+                    center={this.state.center} 
+                    onClick={this.locationClicked}>
                     <SearchBox ref='searchBox'
                                bounds={this.state.bounds}
                                controlPosition={window.google.maps.ControlPosition.TOP_LEFT}

@@ -20,13 +20,17 @@ class MapMarker extends React.Component {
             };
         };
 
-        this.markerClicked = () => {
+        this.markerClicked = (e) => {
+            console.log(e);
             this.setState({
                 isOpen: !this.state.isOpen
             });
         };
     }
 
+    componentWillUpdate(nextProps, nextState) {
+        return true;
+    }
 
     render() {
         const marker = this.props.marker;
@@ -42,12 +46,12 @@ class MapMarker extends React.Component {
                         <div>
                             <span style={{ fontSize: `14px`, fontWeight: `bold` }}>{marker.placeInfo.name}</span> <br />
                             <span>{marker.placeInfo.formatted_address}</span> <br />
-                            {this.props.isDisplay && <span>
+                            <span>
                                 <a href={`https://maps.google.com/?daddr=${marker.position.lat}, ${marker.position.lng}`}
                                     target='__blank'>
                                     Get directions
                                 </a>
-                            </span>}
+                            </span>
                         </div>
                     </InfoWindow>
                 ) : ''}
