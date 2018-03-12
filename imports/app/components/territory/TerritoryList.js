@@ -25,13 +25,13 @@ export class TerritoryList extends React.Component {
         })    
     }
 
-    selectTerritory = (territory) => {
-        TerritoryStore.center = this.getCenter(territory.area);
+    selectTerritory(territory) {
+        TerritoryStore.center = this.getCenter(territory.geometry.coordinates);
         TerritoryStore.territory = territory;
         TerritoryStore.mode = 'view';
     }
     
-    getCenter = (area) => {
+    getCenter(area) {
             var lowx,
                 highx,
                 lowy,
@@ -40,7 +40,7 @@ export class TerritoryList extends React.Component {
                 lngs = [],
                 vertices = area;
         
-            for(var i=0; i<vertices.length; i++) {
+            for(var i=0; i < vertices.length; i++) {
               lngs.push(vertices[i].lng);
               lats.push(vertices[i].lat);
             }
@@ -56,7 +56,7 @@ export class TerritoryList extends React.Component {
             return (new google.maps.LatLng(center_x, center_y));
     }
 
-    setAddMode = () => {
+    setAddMode() {
         TerritoryStore.setSelectedTerritory({});
         TerritoryStore.mode = 'add';
     }

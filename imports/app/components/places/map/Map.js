@@ -27,14 +27,24 @@ export class Map extends React.Component {
         navigator.geolocation.getCurrentPosition((position) => {
             const lat = Number(position.coords.latitude);
             const lng = Number(position.coords.longitude);
-            const currentLocation = {
-                position: { lat, lng }
-            };
 
-            this.setState({
-                center: currentLocation.position,
-                markers: [currentLocation]
+            this.geocoder.geocode({
+                'latLng': { lat, lng }
+            }, (results, status) => {
+                const newMarker = {
+                    placeInfo: {
+                        name: `${results[0].address_components[0].short_name} ${results[0].address_components[1].short_name}`,
+                        formatted_address: results[0].formatted_address
+                    },
+                    position: results[0].geometry.location,
+                    open: true
+                };
+                this.setState({
+                    center: newMarker.position,
+                    markers: [newMarker]
+                });
             });
+            
         });
 
         this.onBoundsChanged = () => {

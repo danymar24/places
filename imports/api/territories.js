@@ -12,7 +12,7 @@ if (Meteor.isServer) {
 Meteor.methods({
     'territories.save'(id, data) {
         if (id) {
-            return Territories.update({ _id: id }, { $set: { area: data.area }});
+            return Territories.update({ _id: id }, { $set: { geometry: data.geometry }});
         } else {
             return Territories.insert(data);
         }

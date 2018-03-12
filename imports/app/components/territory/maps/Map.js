@@ -2,15 +2,11 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import { Meteor } from 'meteor/meteor';
 
-import { GoogleMap, withScriptjs, withGoogleMap, Polygon, Rectangle } from 'react-google-maps';
+import { GoogleMap, withScriptjs, withGoogleMap, Polygon } from 'react-google-maps';
 import DrawingManager from 'react-google-maps/lib/components/drawing/DrawingManager';
-import { MapMarker } from './Marker';
 import { Territory } from './Territory';
 import { TerritoryStore } from '../TerritoryStore';
 
-// Todo: Add center to created territory
-// Todo: add delete territory
-// Todo: add square figure
 // Todo: search for the fitBounds function
 
 @observer
@@ -19,9 +15,8 @@ export class Map extends React.Component {
         super(props);
         this.state = {
             center: {}, 
-            markers: [],
             drawingMode: window.google.maps.drawing.OverlayType.POLYGON,
-        }
+        };
     }
 
     componentWillMount() {
@@ -34,101 +29,83 @@ export class Map extends React.Component {
 
             this.setState({
                 center: currentLocation.position,
-                markers: [currentLocation],
                 drawingMode: window.google.maps.drawing.OverlayType.POLYGON
             });
             TerritoryStore.setCenter(currentLocation.position);
         });
+
+        this.onOverlayCompleted = (e) => {
+            e.overlay.setMap(null);
+            TerritoryStore.setSelectedTerritory({
+                geometry: {
+                    coordinates: e.overlay.getPath().b,
+                    type: e.type
+                }
+            });
+            console.log('area from map', TerritoryStore.territory);
+        }
+    
+        this.setEditMode = () => {
+            TerritoryStore.mode = 'edit';
+        }
+    
+        this.saveTerritory = () => {
+            const coordinates = this.ref.getPath().b.map(coord => {
+                return {lat: coord.lat(), lng: coord.lng()};
+            });
+    
+            Meteor.call('territories.save', TerritoryStore.territory._id, {
+                geometry: {
+                    coordinates,
+                    type: TerritoryStore.territory.type
+                }
+            }, (err, success) => {
+                if (err) {
+                    M.toast({html: err.reason}, 4000);
+                } else {
+                    M.toast({html: 'Territory created.'})
+                }
+            });
+            if (!TerritoryStore.territory._id) {
+                TerritoryStore.setSelectedTerritory({});
+            }
+        }
+        
+        this.cancelAdd = () => {
+            TerritoryStore.setSelectedTerritory({});
+            TerritoryStore.mode = 'view';
+        }
+        
+        this.modifiedOverlay = (e) => {
+            console.log(this.ref.getPath());
+            TerritoryStore.setSelectedTerritory({
+                _id: TerritoryStore.territory._id,
+                area: this.ref.getPath().b,
+                type: TerritoryStore.territory.type
+            });
+        }
+    
+        this.removeTerritory = (territory) => {
+            Meteor.call('territories.remove', territory._id, (err, success) => {
+                if (err) {
+                    M.toast({ html: err.reason }, 4000);
+                } else {
+                    TerritoryStore.setSelectedTerritory({});
+                    TerritoryStore.mode = 'view';
+                    M.toast({ html: 'Territory deleted' }, 4000);
+                }
+            })
+        }
+    
+        this.bindRef = ref => this.ref = ref;
     }
 
     componentWillUpdate() {
         return true;
     }
 
-    componentWillReceiveProps(nextProps) {
-        console.log(nextProps);
-    }
-
-    onOverlayCompleted = (e) => {
-        e.overlay.setMap(null);
-        let area;
-        if (e.type === 'polygon') {
-            area = e.overlay.getPath().b;
-        } else {
-            area = {
-                north: e.overlay.getBounds().getNorthEast().lat(),
-                south: e.overlay.getBounds().getNorthEast().lng(),
-                east: e.overlay.getBounds().getSouthWest().lat(),
-                west: e.overlay.getBounds().getSouthWest().lng()    
-            }
-        }
-        TerritoryStore.setSelectedTerritory({
-            area,
-            type: e.type
-        });
-        console.log('area from map', TerritoryStore.territory.area);
-    }
-
-    setEditMode = () => {
-        TerritoryStore.mode = 'edit';
-    }
-
-    saveTerritory = () => {
-        let area;
-        if (TerritoryStore.territory.type === 'polygon') {
-            area = this.ref.getPath().b.map(coord => {
-                return {lat: coord.lat(), lng: coord.lng()};
-            });
-        } else {
-            area = TerritoryStore.territory.area;
-        }
-        Meteor.call('territories.save', TerritoryStore.territory._id, {
-            area,
-            type: TerritoryStore.territory.type
-        }, (err, success) => {
-            if (err) {
-                M.toast({html: err.reason}, 4000);
-            } else {
-                M.toast({html: 'Territory created.'})
-            }
-        });
-        if (!TerritoryStore.territory._id) {
-            TerritoryStore.setSelectedTerritory({});
-        }
-    }
-    
-    cancelAdd = () => {
-        TerritoryStore.setSelectedTerritory({});
-        TerritoryStore.mode = 'view';
-    }
-    
-    modifiedOverlay = (e) => {
-        TerritoryStore.setSelectedTerritory({
-            _id: TerritoryStore.territory._id,
-            area: this.ref.getPath().b,
-            type: TerritoryStore.territory.type
-        });
-    }
-
-    removeTerritory = (territory) => {
-        Meteor.call('territories.remove', territory._id, (err, success) => {
-            if (err) {
-                M.toast({ html: err.reason }, 4000);
-            } else {
-                TerritoryStore.setSelectedTerritory({});
-                TerritoryStore.mode = 'view';
-                M.toast({ html: 'Territory deleted' }, 4000);
-            }
-        })
-    }
-
-    bindRef = ref => this.ref = ref;
-
     render() {
-        const markers = this.state.markers.map((marker, i) => {
-            return <MapMarker marker={ marker.position } key={i}/>                        
-        })
-        
+      
         return (
                 <GoogleMap
                     ref='map'
@@ -147,14 +124,17 @@ export class Map extends React.Component {
                                             }
                                         }}
                                         onOverlayComplete={this.onOverlayCompleted} />}
-                        <Territory territory={{
-                                        area: TerritoryStore.territory.area, 
-                                        type: TerritoryStore.territory && TerritoryStore.territory.type
-                                    }}
-                                   mode={TerritoryStore.mode}
-                                   modifiedOverlay={this.modifiedOverlay}
-                                   bindRef={this.bindRef} />
-                    { markers }
+                    <Polygon path={TerritoryStore.territory &&
+                                   TerritoryStore.territory.geometry && 
+                                   TerritoryStore.territory.geometry.coordinates }
+                            editable={TerritoryStore.mode === 'edit' || TerritoryStore.mode === 'add'}
+                            ref={this.bindRef}
+                            onMouseUp={this.modifiedOverlay.bind(this)}
+                            options={{
+                                strokeWeight: 2,
+                                fillColor:`#53b557`,
+                                fillOpacity: 0.35,
+                            }}/>
                     <div className='map-buttons' 
                          style={{
                                 position: `absolute`,

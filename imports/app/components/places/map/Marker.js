@@ -12,45 +12,52 @@ class MapMarker extends React.Component {
             isOpen: this.props.openInfo || false
         });
 
-        this.markerDragged = (e) => {
-            const markerPosition = {
-                location: {
-                    lat: e.latLng.lat(), lng: e.latLng.lng()
-                }
-            };
-        };
-
         this.markerClicked = (e) => {
-            console.log(e);
             this.setState({
                 isOpen: !this.state.isOpen
             });
         };
+
+        this.addPlace = () => {
+            const { marker } = this.props;
+            const newPlace = {
+                location:{
+                    type: 'Point',
+                    coordinates: [marker.position.lat(), marker.position.lng()]
+                },
+                address: marker.placeInfo.formatted_address,
+                name: this.state.name,
+            };
+            console.log(newPlace);
+        }
     }
 
     componentWillUpdate(nextProps, nextState) {
         return true;
     }
 
+
     render() {
         const marker = this.props.marker;
+        console.log(marker);
 
         return (
             <Marker position={marker.position}
-                draggable={!this.props.isDisplay}
-                onDragEnd={this.markerDragged}
                 onClick={this.markerClicked} >
 
                 {this.state.isOpen && marker.placeInfo ? (
                     <InfoWindow>
-                        <div>
+                        <div className='marker-info'>
                             <span style={{ fontSize: `14px`, fontWeight: `bold` }}>{marker.placeInfo.name}</span> <br />
-                            <span>{marker.placeInfo.formatted_address}</span> <br />
+                            <span>{marker.placeInfo.formatted_address}</span> <br/>
+                            <div className=''>
+                                <input type='text' 
+                                       placeholder='Name' 
+                                       onChange={(e) => {this.setState({name: e.target.value})}} />
+                            </div>
                             <span>
-                                <a href={`https://maps.google.com/?daddr=${marker.position.lat}, ${marker.position.lng}`}
-                                    target='__blank'>
-                                    Get directions
-                                </a>
+                                <button className='btn btn-small waves-effect waves-light right'
+                                        onClick={this.addPlace}>Add</button>
                             </span>
                         </div>
                     </InfoWindow>
