@@ -29,6 +29,25 @@ export class TerritoryList extends React.Component {
         TerritoryStore.center = this.getCenter(territory.geometry.coordinates);
         TerritoryStore.territory = territory;
         TerritoryStore.mode = 'view';
+
+        console.log(this.getBounds(territory.geometry.coordinates));
+    }
+
+    getBounds(coords) {
+        let point;
+        let points = [];
+        let bounds = new google.maps.LatLngBounds();
+        let polygon;
+
+        coords.forEach(coord => {
+            point = new google.maps.LatLng(coord.lat, coord.lng);
+            bounds.extend(point);
+            points.push(point);
+        });
+
+        console.log(google.maps.fitBounds(bounds));
+
+        return bounds;
     }
     
     getCenter(area) {
